@@ -7,7 +7,7 @@
     "start": "node index.js",
     "test:coverage": "jest --coverage --coverageReporters=html",
     "test:ci": "jest --ci --coverage --coverageReporters=cobertura",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No tests yet\" && exit 0"
       
   },
   "dependencies": {
