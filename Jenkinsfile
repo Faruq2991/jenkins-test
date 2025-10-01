@@ -47,7 +47,7 @@ pipeline {
             steps {
                 echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${APP_VERSION}"
                 sh ''' 
-                eval $(minikube docker-env)
+                export DOCKER_HOST=$(minikube docker-env --shell bash | grep DOCKER_HOST | cut -d= -f2)
                 docker build -t ${DOCKER_IMAGE}:${APP_VERSION} .
                 docker tag ${DOCKER_IMAGE}:${APP_VERSION} ${DOCKER_IMAGE}:latest
                 '''
