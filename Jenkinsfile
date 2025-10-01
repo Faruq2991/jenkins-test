@@ -46,14 +46,11 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${APP_VERSION}"
-                script {
-                    // Use Minikube's Docker daemon
-                    sh '''
-                        eval $(minikube docker-env)
-                        docker build -t ${DOCKER_IMAGE}:${APP_VERSION} .
-                        docker tag ${DOCKER_IMAGE}:${APP_VERSION} ${DOCKER_IMAGE}:latest
-                    '''
-                }
+                sh ''' 
+                eval $(minikube docker-env)
+                docker build -t ${DOCKER_IMAGE}:${APP_VERSION} .
+                docker tag ${DOCKER_IMAGE}:${APP_VERSION} ${DOCKER_IMAGE}:latest
+                '''
             }
         }
         
