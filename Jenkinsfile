@@ -85,7 +85,7 @@ pipeline {
                 echo '🚀 Deploying to local Kubernetes cluster...'
                 sh """
                     # Update image version in deployment
-                    sed 's|BUILD_NUMBER_PLACEHOLDER|${APP_VERSION}|g' k8s-deployment.yaml | kubectl apply -f - -n ${K8S_NAMESPACE}
+                    sed -e 's|BUILD_NUMBER_PLACEHOLDER|${APP_VERSION}|g' -e 's|NAMESPACE_PLACEHOLDER|${K8S_NAMESPACE}|g' k8s-deployment.yaml | kubectl apply -f - -n ${K8S_NAMESPACE}
                     
                     # Set the new image
                     kubectl set image deployment/myapp-deployment \
