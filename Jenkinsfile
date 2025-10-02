@@ -47,7 +47,8 @@ pipeline {
             steps {
                 echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${APP_VERSION}"
                 sh ''' 
-                export DOCKER_HOST=$(minikube docker-env --shell bash | grep DOCKER_HOST | cut -d= -f2) # This makes Jenkins use Minikube’s Docker daemon.
+                # Use Minikube's Docker daemon
+                eval $(minikube docker-env)
                 docker build -t ${DOCKER_IMAGE}:${APP_VERSION} .
                 docker tag ${DOCKER_IMAGE}:${APP_VERSION} ${DOCKER_IMAGE}:latest
                 '''
