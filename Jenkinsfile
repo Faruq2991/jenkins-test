@@ -46,27 +46,35 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${APP_VERSION}"
-                sh ''' 
-                # Use Minikube's Docker daemon
-                export DOCKER_HOST=$(minikube docker-env --shell bash | grep DOCKER_HOST | cut -d= -f2 | tr -d '"')
-                export DOCKER_CERT_PATH=$(minikube docker-env --shell bash | grep DOCKER_CERT_PATH | cut -d= -f2 | tr -d '"')
-                export DOCKER_TLS_VERIFY=$(minikube docker-env --shell bash | grep DOCKER_TLS_VERIFY | cut -d= -f2 | tr -d '"')
+                sh """ 
+                # Set up Minikube Docker environment
+                eval \$(minikube -p minikube docker-env)
+                
+                # Build and tag images
                 docker build -t ${DOCKER_IMAGE}:${APP_VERSION} .
                 docker tag ${DOCKER_IMAGE}:${APP_VERSION} ${DOCKER_IMAGE}:latest
-                '''
+                """
             }
         }
         
         stage('Push to DockerHub') {
             steps {
                 echo '📤 Pushing image to DockerHub...'
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        sh """
-                            docker push ${DOCKER_IMAGE}:${APP_VERSION}
-                            docker push ${DOCKER_IMAGE}:latest
-                        """
-                    }
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        # Set up Minikube Docker environment
+                        eval \$(minikube -p minikube docker-env)
+                        
+                        # Login to DockerHub
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                        
+                        # Push images
+                        docker push ${DOCKER_IMAGE}:${APP_VERSION}
+                        docker push ${DOCKER_IMAGE}:latest
+                        
+                        # Logout
+                        docker logout
+                    """
                 }
             }
         }
