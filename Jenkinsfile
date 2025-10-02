@@ -47,7 +47,7 @@ pipeline {
             steps {
                 echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${APP_VERSION}"
                 sh ''' 
-                export DOCKER_HOST=$(minikube docker-env --shell bash | grep DOCKER_HOST | cut -d= -f2)
+                export DOCKER_HOST=$(minikube docker-env --shell bash | grep DOCKER_HOST | cut -d= -f2) # This makes Jenkins use Minikube’s Docker daemon.
                 docker build -t ${DOCKER_IMAGE}:${APP_VERSION} .
                 docker tag ${DOCKER_IMAGE}:${APP_VERSION} ${DOCKER_IMAGE}:latest
                 '''
@@ -56,9 +56,9 @@ pipeline {
         
         stage('Push to DockerHub') {
             steps {
-                echo '📤 Pushing to DockerHub...'
+                echo '📤 Pushing image to DockerHub...'
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                         sh """
                             docker push ${DOCKER_IMAGE}:${APP_VERSION}
                             docker push ${DOCKER_IMAGE}:latest
@@ -67,6 +67,7 @@ pipeline {
                 }
             }
         }
+
         
         stage('Deploy to Kubernetes') {
             steps {
